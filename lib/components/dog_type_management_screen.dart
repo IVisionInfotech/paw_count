@@ -10,27 +10,36 @@ import 'package:survey_dogapp/components/common/common_list_shimmer.dart';
 import 'package:survey_dogapp/components/theme.dart';
 import 'package:survey_dogapp/cotroller/dog_type_controller.dart';
 import 'package:survey_dogapp/generated/FontHelper.dart';
+import 'package:survey_dogapp/utils/Common.dart';
+import 'package:survey_dogapp/utils/Constant.dart';
 
 class DogTypeManagementScreen extends StatefulWidget {
   const DogTypeManagementScreen({super.key});
 
   @override
-  State<DogTypeManagementScreen> createState() => _DogTypeManagementScreenState();
+  State<DogTypeManagementScreen> createState() =>
+      _DogTypeManagementScreenState();
 }
 
 class _DogTypeManagementScreenState extends State<DogTypeManagementScreen> {
   final ScrollController _scrollController = ScrollController();
   final DogTypeController controller = Get.put(DogTypeController());
-
-  bool _isFabVisible = true;
+  final isSuperAdmin = CommonUtils.getUserRole() == UrlConstants.SUPER_ADMIN;
+  bool _isFabVisible = false;
 
   @override
   void initState() {
     super.initState();
+    if (isSuperAdmin) {
+      _isFabVisible = true;
+    }
     _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+      if (isSuperAdmin) return;
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
         if (_isFabVisible) setState(() => _isFabVisible = false);
-      } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+      } else if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
         if (!_isFabVisible) setState(() => _isFabVisible = true);
       }
     });
@@ -40,15 +49,16 @@ class _DogTypeManagementScreenState extends State<DogTypeManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: _isFabVisible
-          ? FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        onPressed: () {
-          controller.showAddDogTypeDialog(context);
-        },
-        child: const Icon(Icons.add, size: 30, color: AppColors.white),
-      )
-          : null,
+      floatingActionButton:
+          _isFabVisible
+              ? FloatingActionButton(
+                backgroundColor: AppColors.primary,
+                onPressed: () {
+                  controller.showAddDogTypeDialog(context);
+                },
+                child: const Icon(Icons.add, size: 30, color: AppColors.white),
+              )
+              : null,
       body: SafeArea(
         child: Stack(
           children: [
@@ -59,7 +69,7 @@ class _DogTypeManagementScreenState extends State<DogTypeManagementScreen> {
                   'Dog Type Management',
                   20,
                   context,
-                      () {
+                  () {
                     Get.back();
                   },
                 ),
@@ -101,15 +111,25 @@ class _DogTypeManagementScreenState extends State<DogTypeManagementScreen> {
                           final dog = controller.dogTypeList[index];
                           return ListCardView(
                             dog: dog,
-                            onEdit: () => controller.showAddDogTypeDialog(context, dogModel: dog),
+                            isVisible:
+                                CommonUtils.getUserRole() ==
+                                UrlConstants.SUPER_ADMIN,
+                            onEdit:
+                                () => controller.showAddDogTypeDialog(
+                                  context,
+                                  dogModel: dog,
+                                ),
                             onDelete: () {
                               DialogHelper.showCommonDialog(
                                 context: context,
                                 title: "Confirm Delete",
-                                subTitle: "Are you sure you want to delete this dog type?",
+                                subTitle:
+                                    "Are you sure you want to delete this dog type?",
                                 onPositivePressed: () async {
                                   Get.back();
-                                  await controller.deleteDogType(dog.id.toString());
+                                  await controller.deleteDogType(
+                                    dog.id.toString(),
+                                  );
                                 },
                                 negativeText: "No",
                                 positiveText: "Yes",
@@ -128,26 +148,26 @@ class _DogTypeManagementScreenState extends State<DogTypeManagementScreen> {
             Obx(() {
               return controller.isLoadingEdit.value
                   ? Positioned.fill(
-                child: Container(
-                  color: AppColors.black.withOpacity(0.4),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CircularProgressIndicator(
-                        color: AppColors.primary,
+                    child: Container(
+                      color: AppColors.black.withOpacity(0.4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "Loading...",
+                            style: FontHelper.regular(
+                              color: AppColors.white,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        "Loading...",
-                        style: FontHelper.regular(
-                          color: AppColors.white,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
+                    ),
+                  )
                   : const SizedBox.shrink();
             }),
           ],

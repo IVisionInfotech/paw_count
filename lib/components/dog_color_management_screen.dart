@@ -10,6 +10,8 @@ import 'package:survey_dogapp/components/common/common_list_shimmer.dart';
 import 'package:survey_dogapp/components/theme.dart';
 import 'package:survey_dogapp/cotroller/dog_color_controller.dart';
 import 'package:survey_dogapp/generated/FontHelper.dart';
+import 'package:survey_dogapp/utils/Common.dart';
+import 'package:survey_dogapp/utils/Constant.dart';
 
 class DogColorManagementScreen extends StatefulWidget {
   const DogColorManagementScreen({super.key});
@@ -21,13 +23,18 @@ class DogColorManagementScreen extends StatefulWidget {
 class _DogColorManagementScreenState extends State<DogColorManagementScreen> {
   final ScrollController _scrollController = ScrollController();
   final DogColorController controller = Get.put(DogColorController());
-
-  bool _isFabVisible = true;
+  final isSuperAdmin = CommonUtils.getUserRole() == UrlConstants.SUPER_ADMIN;
+  bool _isFabVisible = false;
 
   @override
   void initState() {
     super.initState();
+    if (isSuperAdmin) {
+      _isFabVisible = true;
+    }
+
     _scrollController.addListener(() {
+      if (isSuperAdmin) return;
       if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
         if (_isFabVisible) setState(() => _isFabVisible = false);
       } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
@@ -101,6 +108,8 @@ class _DogColorManagementScreenState extends State<DogColorManagementScreen> {
                           final dog = controller.dogColorList[index];
                           return ListCardView(
                             dog: dog,
+                            isVisible:CommonUtils.getUserRole() ==
+                                UrlConstants.SUPER_ADMIN,
                             onEdit: () => controller.showAddDogTypeDialog(context, dogModel: dog),
                             onDelete: () {
                               DialogHelper.showCommonDialog(

@@ -1,4 +1,4 @@
-package com.surveydogapp.survey_dogapp
+package com.paw.count
 
 import io.flutter.embedding.android.FlutterActivity
 

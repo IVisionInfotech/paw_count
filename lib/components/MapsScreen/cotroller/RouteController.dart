@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:survey_dogapp/components/MapsScreen/RoutePreviewScreen.dart';
 
@@ -36,6 +37,67 @@ class RouteController extends GetxController {
     super.onInit();
     loadSavedBorder();
     _getCurrentLocation();
+  }
+
+
+  final searchController = TextEditingController();
+  final placePredictions = [].obs;
+
+  final String _apiKey = 'AIzaSyCTxSa2jViHaPwRrbjy55psU760-suFaE4';
+
+  void onSearchChanged(String value) async {
+    if (value.length < 3) {
+      placePredictions.clear();
+      return;
+    }
+
+    final sessionToken = DateTime.now().millisecondsSinceEpoch.toString();
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/place/autocomplete/json'
+          '?input=${Uri.encodeComponent(value)}'
+          '&types=geocode'
+          '&sessiontoken=$sessionToken'
+          '&key=$_apiKey',
+    );
+
+    try {
+      final response = await http.get(url);
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200 && data['status'] == 'OK') {
+        placePredictions.value = data['predictions'];
+      } else {
+        placePredictions.clear();
+        print('Autocomplete API error: ${data['status']}');
+      }
+    } catch (e) {
+      print('Search exception: $e');
+    }
+  }
+
+  /// Called when selecting a prediction
+  void onPlaceSelected(String placeId) async {
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$_apiKey',
+    );
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body)['result'];
+      final location = result['geometry']['location'];
+      final latLng = LatLng(location['lat'], location['lng']);
+
+      placePredictions.clear();
+      searchController.clear();
+
+      if (mapController.value != null) {
+        mapController.value!.animateCamera(
+          CameraUpdate.newLatLngZoom(latLng, 18),
+        );
+      }
+    } else {
+      print('Place details fetch failed');
+    }
   }
 
   Future<void> _getCurrentLocation() async {

@@ -8,12 +8,15 @@ import 'package:flutter/cupertino.dart';
 
 class ListCardView extends StatelessWidget {
   final DogTypeModel dog;
+  final bool isVisible;
+
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const ListCardView({
     Key? key,
     required this.dog,
+    required this.isVisible,
     required this.onEdit,
     required this.onDelete,
   }) : super(key: key);
@@ -70,17 +73,20 @@ class ListCardView extends StatelessWidget {
           dog.description ?? "N/A",
           style: FontHelper.regular(fontSize: 14),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(onPressed: onEdit, icon: const Icon(Icons.edit)),
-            IconButton(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete),
-              color: Colors.red,
-            ),
-          ],
-        ),
+        trailing:
+            isVisible
+                ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(onPressed: onEdit, icon: const Icon(Icons.edit)),
+                    IconButton(
+                      onPressed: onDelete,
+                      icon: const Icon(Icons.delete),
+                      color: Colors.red,
+                    ),
+                  ],
+                )
+                : null,
       ),
     );
   }

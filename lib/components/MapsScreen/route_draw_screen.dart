@@ -33,6 +33,50 @@ class _RouteDrawScreenState extends State<RouteDrawScreen> {
     }
   }
 
+  Widget _buildSearchBar() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: TextField(
+            controller: controller.searchController,
+            onChanged: controller.onSearchChanged,
+            decoration: InputDecoration(
+              hintText: "Search address...",
+              prefixIcon: Icon(Icons.search),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ),
+        Obx(() {
+          return controller.placePredictions.isEmpty
+              ? SizedBox.shrink()
+              : Container(
+            color: Colors.white,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: controller.placePredictions.length,
+              itemBuilder: (context, index) {
+                final prediction = controller.placePredictions[index];
+                return ListTile(
+                  title: Text(prediction['description']),
+                  onTap: () =>
+                      controller.onPlaceSelected(prediction['place_id']),
+                );
+              },
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!widget.isManually) {
@@ -195,6 +239,8 @@ class _RouteDrawScreenState extends State<RouteDrawScreen> {
               ),
             ),
             const SizedBox(height: 10),
+            // _buildSearchBar(),
+            // const SizedBox(height: 10),
             Expanded(
               child: Obx(() {
                 return controller.savedBorder.isEmpty

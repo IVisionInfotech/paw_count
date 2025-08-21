@@ -4,13 +4,15 @@ class CountModel {
   int? surveyorCount;
   int? dogTypeCount;
   int? surveyRouteCount;
+  int? staffCount;
 
   CountModel(
       {this.adminCount,
         this.subadminCount,
         this.surveyorCount,
         this.dogTypeCount,
-        this.surveyRouteCount
+        this.surveyRouteCount,
+        this.staffCount
       });
 
   CountModel.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,7 @@ class CountModel {
     surveyorCount = json['surveyor_count'];
     dogTypeCount = json['dog_type_count'];
     surveyRouteCount = json['route_count'];
+    staffCount = json['staff_count'];
   }
 
   Map<String, dynamic> toJson() {
@@ -28,6 +31,7 @@ class CountModel {
     data['surveyor_count'] = this.surveyorCount;
     data['dog_type_count'] = this.dogTypeCount;
     data['route_count'] = this.surveyRouteCount;
+    data['staff_count'] = this.staffCount;
     return data;
   }
 }

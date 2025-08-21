@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:survey_dogapp/components/common/custom_image_shimmer_effect.dart';
+import 'package:survey_dogapp/utils/Common.dart';
+import 'package:survey_dogapp/utils/Constant.dart';
 import '../../generated/FontHelper.dart';
 import '../theme.dart';
 import 'package:marquee/marquee.dart';
@@ -119,6 +121,7 @@ class UserCardWidget extends StatelessWidget {
                 onPressed: onDelete,
               ),
             ),
+            if(CommonUtils.getUserRole() == UrlConstants.SUPER_ADMIN)
             IconButton(
               icon: Icon(
                 isRegistered ? Icons.do_disturb_on : Icons.check_circle,

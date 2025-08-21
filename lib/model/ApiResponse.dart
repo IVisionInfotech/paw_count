@@ -5,6 +5,7 @@ import 'package:survey_dogapp/model/dogOwner.dart';
 import 'package:survey_dogapp/model/count_model.dart';
 import 'package:survey_dogapp/model/dog_type_model.dart';
 import 'package:survey_dogapp/model/report_model.dart';
+import 'package:survey_dogapp/model/staff_dog_model.dart';
 
 import 'User.dart';
 
@@ -29,6 +30,7 @@ class ApiResponse {
   List<RouteDataModel>? routeCompleteList;
   List<RouteDataModel>? routeUncompleteList;
   List<DogCatchDataModel>? dogCatchList;
+  List<StaffDogModel>? staffDoglist;
 
   ApiResponse({
     this.status,
@@ -52,6 +54,12 @@ class ApiResponse {
     status = json['status'];
     message = json['message'];
     pdfurl = json['pdfurl'];
+
+    if (json['staffDogList'] != null && json['staffDogList'] is List) {
+      staffDoglist = (json['staffDogList'] as List)
+          .map((v) => StaffDogModel.fromJson(v))
+          .toList();
+    }
 
     if (json['userlist'] != null) {
       if (json['userlist'] is List) {
@@ -139,6 +147,8 @@ class ApiResponse {
           .map((v) => DogCatchDataModel.fromJson(v))
           .toList();
     }
+
+
 
   }
 

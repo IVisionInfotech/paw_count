@@ -1,9 +1,9 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:survey_dogapp/utils/Common.dart';
 
 class UrlConstants {
   // Base URL
-  static const String baseUrl = "https://pawcount.com/api/";
+  static const String baseUrl = "https://pawcount.com/BetaVersion/api/";
   static const String apiKey = "tLJmY6AHDZ9jR3XqNa7QpWcRVfGhUsyM";
 
   static const String SUPER_ADMIN = "SUPER ADMIN";
@@ -12,11 +12,16 @@ class UrlConstants {
   static const String SUB_ADMIN = "SUB ADMIN";
   static const String CITY_ADMIN = "CITY ADMIN";
   static const String SURVEYOR = "SURVEYOR";
+  static const String STAFF = "STAFF";
 
-
-  static const superAdminRoles = ['STATE ADMIN', 'CITY ADMIN', 'SURVEYOR'];
-  static const adminRoles = ['CITY ADMIN', 'SURVEYOR'];
-  static const subAdminRoles = ['SURVEYOR'];
+  static const superAdminRoles = [
+    'STATE ADMIN',
+    'CITY ADMIN',
+    'SURVEYOR',
+    'ASSOCIATES',
+  ];
+  static const adminRoles = ['CITY ADMIN', 'SURVEYOR', 'ASSOCIATES'];
+  static const subAdminRoles = ['SURVEYOR','ASSOCIATES'];
 
   static const String routePending = "In Pending";
   static const String routeProcessing = "In Processing";
@@ -38,20 +43,48 @@ class UrlConstants {
 
     List<Map<String, dynamic>> items = [
       {'title': 'Edit Profile', 'icon': Icons.edit, 'action': 'edit'},
-      {'title': 'Change Password', 'icon': Icons.lock_reset, 'action': 'password'},
+      {
+        'title': 'Change Password',
+        'icon': Icons.lock_reset,
+        'action': 'password',
+      },
     ];
 
     if (role == SUPER_ADMIN || role == ADMIN) {
       items.addAll([
-        {'title': 'Pet Owner Profile', 'icon': Icons.person, 'action': 'addOwner'},
-        {'title': 'Pet Dog Color Management', 'icon': Icons.palette, 'action': 'color'},
-        {'title': 'Pet Dog Breed Management', 'icon': Icons.pets, 'action': 'breed'},
+        {
+          'title': 'Pet Owner Profile',
+          'icon': Icons.person,
+          'action': 'addOwner',
+        },
+        {
+          'title': 'Pet Dog Color Management',
+          'icon': Icons.palette,
+          'action': 'color',
+        },
+        {
+          'title': 'Pet Dog Breed Management',
+          'icon': Icons.pets,
+          'action': 'breed',
+        },
       ]);
     } else if (ownership == 1) {
       items.addAll([
-        {'title': 'Pet Owner Profile', 'icon': Icons.person, 'action': 'addOwner'},
-        {'title': 'Pet Dog Color Management', 'icon': Icons.palette, 'action': 'color'},
-        {'title': 'Pet Dog Breed Management', 'icon': Icons.pets, 'action': 'breed'},
+        {
+          'title': 'Pet Owner Profile',
+          'icon': Icons.person,
+          'action': 'addOwner',
+        },
+        {
+          'title': 'Pet Dog Color Management',
+          'icon': Icons.palette,
+          'action': 'color',
+        },
+        {
+          'title': 'Pet Dog Breed Management',
+          'icon': Icons.pets,
+          'action': 'breed',
+        },
       ]);
     }
 
@@ -59,7 +92,6 @@ class UrlConstants {
 
     return items;
   }
-
 
   // Auth endpoints
   static const String loginUrl = "${baseUrl}login";
@@ -125,4 +157,7 @@ class UrlConstants {
   //Count endpoints
   static const String countManage = "${baseUrl}master-count";
   static const String viewReport = "${baseUrl}report";
+
+  //Staff
+  static const String staff = "${baseUrl}dog-catch-staff";
 }

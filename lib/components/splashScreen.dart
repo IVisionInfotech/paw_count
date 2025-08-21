@@ -6,6 +6,7 @@ import 'package:realm/realm.dart';
 import 'package:survey_dogapp/components/Auth/login_page.dart';
 import 'package:survey_dogapp/components/City/cotroller/LocationController.dart';
 import 'package:survey_dogapp/components/Dashboard/dashboard.dart';
+import 'package:survey_dogapp/components/staff_management_screen.dart';
 import 'package:survey_dogapp/cotroller/login_cotroller.dart';
 import 'package:survey_dogapp/generated/assets.dart';
 import 'package:survey_dogapp/model/user_model.dart';
@@ -46,7 +47,12 @@ class _SplashScreenState extends State<SplashScreen> {
         await Future.delayed(const Duration(seconds: 2));
         setState(() {});
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Get.off(() => Dashboard());
+          if (CommonUtils.getUserRole()?.toLowerCase() == 'staff') {
+            Get.off(() => StaffManagementScreen());
+          }else{
+            Get.off(() => Dashboard());
+          }
+
         });
       } else {
         await Future.delayed(const Duration(seconds: 2));

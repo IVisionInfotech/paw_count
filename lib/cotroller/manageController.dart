@@ -17,6 +17,7 @@ class ManageController extends GetxController {
     {'title': 'State Admin', 'icon': Icons.admin_panel_settings, 'screen': UsersList(title: 'Admin List'), 'count': 0},
     {'title': 'City Admin', 'icon': Icons.supervised_user_circle, 'screen': UsersList(title: 'SubAdmin List'), 'count': 0},
     {'title': 'Surveyor', 'icon': Icons.badge, 'screen': UsersList(title: 'Surveyor List'), 'count': 0},
+    {'title': 'Associates', 'icon': Icons.person_pin_sharp, 'screen': UsersList(title: 'Associates List'), 'count': 0},
     {'title': 'Dog Type', 'icon': Icons.pets, 'screen': DogTypeManagementScreen(), 'count': 0},
     {'title': 'Location Manage', 'icon': Icons.location_on, 'screen': Locationlistscreen()},
     {'title': 'Survey Route', 'icon': Icons.route, 'screen': Homepagesurveyor(flag: "Manage",), 'count': 0},
@@ -59,7 +60,7 @@ class ManageController extends GetxController {
     }
     if (response.status == 1 && response.countModel != null) {
       for (var item in allItems) {
-        final title = item['title'];
+        final title = item['title'] == 'Staff' ? 'Associates' : item['title'];
         final countData = response.countModel;
         if (item.containsKey('count')) {
           item['count'] = {
@@ -68,10 +69,10 @@ class ManageController extends GetxController {
             'Surveyor': countData.surveyorCount ?? 0,
             'Dog Type': countData.dogTypeCount ?? 0,
             'Survey Route': countData.surveyRouteCount ?? 0,
+            'Associates': countData.staffCount ?? 0,
           }[title] ?? 0;
         }
       }
-// Refresh observable to reflect count updates
       loadManageItems();
     } else {
       CommonUtils.buildSnackBar(response.message ?? "No users found.", "Error", AppColors.red, 2);

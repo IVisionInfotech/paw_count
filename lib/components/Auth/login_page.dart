@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:survey_dogapp/components/City/cotroller/LocationController.dart';
 import 'package:survey_dogapp/components/Dashboard/dashboard.dart';
+import 'package:survey_dogapp/components/staff_management_screen.dart';
 import 'package:survey_dogapp/components/theme.dart';
+import 'package:survey_dogapp/utils/Common.dart';
 import '../../cotroller/login_cotroller.dart';
 import '../common/custom_form_button.dart';
 import '../common/custom_input_field.dart';
@@ -51,18 +53,24 @@ class _LoginPageState extends State<LoginPage> {
                         const PageHeading(title: 'Log-in'),
                         CustomInputField(
                           controller: _emailController,
-                          labelText: 'Email',
-                          hintText: 'Your email id',
+                          labelText: 'Email or Mobile',
+                          hintText: 'Enter email or mobile number',
                           validator: (textValue) {
                             if (textValue == null || textValue.isEmpty) {
-                              return 'Email is required!';
+                              return 'Email or mobile number is required!';
                             }
-                            if (!EmailValidator.validate(textValue)) {
+                            if (RegExp(r'^[0-9]+$').hasMatch(textValue)) {
+                              if (textValue.length != 10) { // change length as per your requirement
+                                return 'Please enter a valid mobile number';
+                              }
+                            }
+                            else if (!EmailValidator.validate(textValue)) {
                               return 'Please enter a valid email';
                             }
                             return null;
                           },
                         ),
+
                         const SizedBox(height: 16),
                         CustomInputField(
                           controller: _passwordController,
@@ -166,7 +174,12 @@ class _LoginPageState extends State<LoginPage> {
         _passwordController.text.trim(),
       )) {
         Get.put(LocationController());
-        Get.offAll(() => Dashboard());
+        if (CommonUtils.getUserRole()?.toLowerCase() == 'staff') {
+          Get.offAll(() => StaffManagementScreen());
+        }else{
+          Get.offAll(() => Dashboard());
+        }
+
       }
     }
   }

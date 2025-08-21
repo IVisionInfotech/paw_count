@@ -171,7 +171,7 @@ class _CreateUserState extends State<CreateUser> {
                                             shape: BoxShape.circle,
                                             color:
                                                 Colors
-                                                    .blue, // background for edit icon
+                                                    .blue,
                                           ),
                                           padding: const EdgeInsets.all(6),
                                           child: const Icon(
@@ -211,7 +211,7 @@ class _CreateUserState extends State<CreateUser> {
                                         CommonUtils.getUserStateId()!.toInt(),
                                       );
                                       controller.loadAdminList(widget.user);
-                                    } else if (controller.selectedRole.value ==  UrlConstants.SURVEYOR) {
+                                    } else if (controller.selectedRole.value ==  UrlConstants.SURVEYOR || controller.selectedRole.value ==  UrlConstants.STAFF) {
                                       if (controller.roleType ==  UrlConstants.SUPER_ADMIN) {
                                         controller.loadAdminList(widget.user);
                                       } else if (controller.roleType ==  UrlConstants.ADMIN) {
@@ -281,10 +281,12 @@ class _CreateUserState extends State<CreateUser> {
                               LengthLimitingTextInputFormatter(10),
                             ],
                             validator: (val) {
-                              if (val == null || val.isEmpty)
+                              if (val == null || val.isEmpty) {
                                 return 'Enter Mobile Number';
-                              if (!RegExp(r'^\d{10}$').hasMatch(val))
+                              }
+                              if (!RegExp(r'^\d{10}$').hasMatch(val)) {
                                 return 'Enter valid 10-digit mobile number';
+                              }
                               return null;
                             },
                           ),

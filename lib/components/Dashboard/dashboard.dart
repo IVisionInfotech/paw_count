@@ -30,8 +30,8 @@ class Dashboard extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmall = screenWidth < 360;
 
-    double fontSizeTitle = isSmall ? 14 : 18;
-    double fontSizeSubtitle = isSmall ? 10 : 12;
+    double fontSizeTitle = isSmall ? 12 : 16;
+    double fontSizeSubtitle = isSmall ? 8 : 10;
     double imageSize = isSmall ? 35 : 45;
     double horizontalPadding = screenWidth * 0.04;
     double topPadding = screenHeight * 0.010;
@@ -83,7 +83,7 @@ class Dashboard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Hi ${controller.userName.value}!',
+                                'Hi ${controller.userName.value} - ${controller.displayRole == "STAFF" ? "Associates" : controller.displayRole}.',
                                 style: FontHelper.bold(
                                   fontSize: fontSizeTitle,
                                   color: Color(0xFFF5F5F5),
@@ -93,7 +93,7 @@ class Dashboard extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Welcome back to ${controller.displayRole} panel.',
+                                'Welcome back to GOAL Foundation Survey panel',
                                 style: FontHelper.regular(
                                   fontSize: fontSizeSubtitle,
                                   color: Color(0xFFDBE0E4),

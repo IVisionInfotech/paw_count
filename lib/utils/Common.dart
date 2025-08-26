@@ -238,15 +238,29 @@ class CommonUtils {
     }
   }
 
-  static void logOut() {
-    final config = Configuration.local([UserModel.schema]);
-    final realm = Realm(config);
+  static Future<bool> logOut() async {
+    final response = await CommonUtils.callApi(
+      url: UrlConstants.logoutUrl,
+      body: {
+        'user_id': CommonUtils.getUserId()
+      },
+    );
 
-    realm.write(() {
-      realm.deleteAll<UserModel>();
-    });
-    Get.deleteAll();
-    Get.offAll(() => LoginPage());
+    if (response == null) {
+      return false;
+    }
+    if (response.status == 1) {
+      final config = Configuration.local([UserModel.schema]);
+      final realm = Realm(config);
+
+      realm.write(() {
+        realm.deleteAll<UserModel>();
+      });
+      Get.deleteAll();
+      Get.offAll(() => LoginPage());
+      return true;
+    }
+    return false;
   }
 
   static void printLongString(String text) {

@@ -13,6 +13,7 @@ class UserCardWidget extends StatelessWidget {
   final User user;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onUpdateRole;
   final void Function(int status) onUnRegested;
 
   const UserCardWidget({
@@ -20,6 +21,7 @@ class UserCardWidget extends StatelessWidget {
     required this.user,
     required this.onEdit,
     required this.onDelete,
+    required this.onUpdateRole,
     required this.onUnRegested,
   });
 
@@ -113,6 +115,12 @@ class UserCardWidget extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.edit, color: AppColors.primary),
               onPressed: onEdit,
+            ),
+            if(user.role != UrlConstants.STAFF)
+            IconButton(
+              icon: const Icon(Icons.manage_accounts, color: Colors.deepPurple),
+              tooltip: 'Update Role',
+              onPressed: onUpdateRole,
             ),
             Visibility(
               visible: false,

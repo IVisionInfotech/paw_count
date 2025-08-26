@@ -15,6 +15,8 @@ class ApiResponse {
   String? pdfurl;
   User? user;
   List<User>? userList;
+  List<LocationModel>? state;
+  List<LocationModel>? cities;
   DogTypeModel? dogTypeModel;
   List<DogTypeModel>? dogTypeList;
   LocationModel? location;
@@ -38,6 +40,8 @@ class ApiResponse {
     this.pdfurl,
     this.user,
     this.userList,
+    this.state,
+    this.cities,
     this.dogTypeModel,
     this.dogTypeList,
     this.location,
@@ -69,6 +73,18 @@ class ApiResponse {
       } else if (json['userlist'] is Map<String, dynamic>) {
         user = User.fromJson(json['userlist']);
       }
+    }
+
+    if (json['state'] is List) {
+      state = (json['state'] as List)
+          .map((v) => LocationModel.fromJson(v))
+          .toList();
+    }
+
+    if (json['cities'] is List) {
+      cities = (json['cities'] as List)
+          .map((v) => LocationModel.fromJson(v))
+          .toList();
     }
 
     if (json['locationlist'] != null) {
@@ -147,9 +163,6 @@ class ApiResponse {
           .map((v) => DogCatchDataModel.fromJson(v))
           .toList();
     }
-
-
-
   }
 
   void parseDogList(dynamic jsonList, Function(List<DogTypeModel>) setList, Function(DogTypeModel) setSingle) {
@@ -175,6 +188,13 @@ class ApiResponse {
     } else if (user != null) {
       jsonMap['userlist'] = user!.toJson();
     }
+
+    jsonMap['state'] =
+        state!.map((loc) => loc.toMap()).toList();
+
+    jsonMap['cities'] =
+        cities!.map((loc) => loc.toMap()).toList();
+
 
     if (locationsList != null) {
       jsonMap['locationlist'] =

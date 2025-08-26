@@ -6,12 +6,15 @@ import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:survey_dogapp/components/common/custom_appbar.dart';
+import 'package:survey_dogapp/components/common/custom_form_button.dart';
 import 'package:survey_dogapp/components/common/custom_image_shimmer_effect.dart';
+import 'package:survey_dogapp/components/common/custom_input_field.dart';
 import 'package:survey_dogapp/components/common/dialog_helper.dart';
 import 'package:survey_dogapp/components/common/common_list_shimmer.dart';
 import 'package:survey_dogapp/components/create_user.dart';
 import 'package:survey_dogapp/components/theme.dart';
 import 'package:survey_dogapp/cotroller/userController.dart';
+import 'package:survey_dogapp/generated/FontHelper.dart';
 import 'package:survey_dogapp/model/User.dart';
 import 'package:survey_dogapp/model/dog_type_model.dart';
 import 'package:survey_dogapp/model/staff_dog_model.dart';
@@ -49,7 +52,7 @@ class _UsersListState extends State<UsersList>
   @override
   void initState() {
     super.initState();
-
+    userController.fetchStates();
     if (isAssociatesList) {
       _tabController = TabController(length: 2, vsync: this);
     }
@@ -214,6 +217,12 @@ class _UsersListState extends State<UsersList>
               icon: isUnregister
                   ? CupertinoIcons.delete
                   : CupertinoIcons.check_mark_circled,
+            );
+          },
+          onUpdateRole: () {
+            showUpdateRoleBottomSheet(
+              context,
+              user,
             );
           },
           user: user,
@@ -617,6 +626,215 @@ class _UsersListState extends State<UsersList>
     } catch (e) {
       return "-";
     }
+  }
+
+  void showUpdateRoleBottomSheet(BuildContext context, User user) {
+    final controller = Get.find<UserController>();
+    controller.setSelectedRoleForEdit(user); // your method to pre-fill values
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Obx(
+              () => SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Update Role", style: FontHelper.bold(fontSize: 18)),
+                const SizedBox(height: 16),
+
+                Obx(() {
+                  final roles = UrlConstants.superAdmin;
+                  return roles.isEmpty
+                      ? const CircularProgressIndicator()
+                      : CustomInputField(
+                    labelText: "Select Role",
+                    hintText: "Select Role",
+                    isDropdown: true,
+                    items: roles,
+                    selectedValue:
+                    roles.contains(controller.selectedDialogRole.value,)
+                        ? controller.selectedDialogRole.value
+                        : null,
+                    onChanged: (value) {
+                      controller.selectedDialogRole.value = value!;
+                      if(controller.selectedDialogRole.value == UrlConstants.SURVEYOR){
+                        controller.loadAdminList(user);
+                      }
+                    },
+                    validator:
+                        (val) =>
+                    val == null || val.isEmpty
+                        ? 'Select Role'
+                        : null,
+                  );
+                }),
+
+                if (controller.selectedDialogRole.value == UrlConstants.STATE_ADMIN ||
+                    controller.selectedDialogRole.value == UrlConstants.CITY_ADMIN)
+                  Obx(
+                        () => CustomInputField(
+                      labelText: "Select State",
+                      hintText: "Select State",
+                      isDropdown: true,
+                      items:
+                      controller.stateList
+                          .map((e) => e.locationName)
+                          .toList(),
+                      selectedValue:
+                      controller.stateList.isNotEmpty
+                          ? controller.stateList
+                          .firstWhereOrNull(
+                            (e) =>
+                        e.locationId ==
+                            controller.selectedDialogState.value,
+                      )
+                          ?.locationName
+                          : null,
+                      onChanged: (val) {
+                        controller.selectedDialogState.value =
+                            controller.stateList
+                                .firstWhereOrNull(
+                                  (e) => e.locationName == val,
+                            )
+                                ?.locationId ??
+                                0;
+                        controller.fetchCities(controller.selectedDialogState.value);
+
+                      },
+                      validator:
+                          (val) =>
+                      val == null || val.isEmpty
+                          ? 'Select State'
+                          : null,
+                    ),
+                  ),
+
+                if (controller.selectedDialogRole.value == UrlConstants.CITY_ADMIN)
+                  Obx(
+                        () => CustomInputField(
+                      labelText: "Select City",
+                      hintText: "Select City",
+                      isDropdown: true,
+                      items:
+                      controller.cityList
+                          .map((city) => city.locationName)
+                          .toList(),
+                      selectedValue:
+                      controller.cityList.isNotEmpty
+                          ? controller.cityList
+                          .firstWhereOrNull(
+                            (city) =>
+                        city.locationId ==
+                            controller.selectedDialogCity.value,
+                      )
+                          ?.locationName
+                          : null,
+                      onChanged: (value) {
+                        controller.selectedDialogCity.value =
+                            controller.cityList
+                                .firstWhereOrNull(
+                                  (city) => city.locationName == value,
+                            )
+                                ?.locationId ??
+                                0;
+                      },
+                      validator:
+                          (val) =>
+                      val == null || val.isEmpty
+                          ? 'Select City'
+                          : null,
+                    ),
+                  ),
+
+                if (controller.selectedDialogRole.value == UrlConstants.SURVEYOR) ...[
+                  Obx(
+                        () => CustomInputField(
+                      labelText: "Select State Admin",
+                      hintText: "Select State Admin",
+                      isDropdown: true,
+                      items: controller.adminList
+                          .map((user) => user.name)
+                          .whereType<String>()
+                          .toList(),
+                      selectedValue: controller.adminList.isNotEmpty
+                          ? controller.adminList
+                          .firstWhereOrNull(
+                            (user) => user.userId == controller.selectedDialogAdmin.value,
+                      )
+                          ?.name
+                          : null,
+                      onChanged: (val) {
+                        final selectedUser = controller.adminList.firstWhereOrNull(
+                              (user) => user.name == val,
+                        );
+                        if (selectedUser != null) {
+                          controller.selectedDialogAdmin.value = selectedUser.userId ?? 0;
+                          controller.fetchCities(selectedUser.stateId!);
+                          controller.loadSubAdminList(
+                            controller.selectedDialogAdmin.value.toString(),
+                            user,
+                          );
+                        } else {
+                          controller.selectedDialogAdmin.value = 0;
+                        }
+                      },
+                      validator: (val) =>
+                      val == null || val.isEmpty ? 'Select Admin' : null,
+                    ),
+                  ),
+                  Obx(() => CustomInputField(
+                    labelText: "Select City Admin",
+                    hintText: "Select City Admin",
+                    isDropdown: true,
+                    items: controller.subAdminList
+                        .map((user) => user.name)
+                        .whereType<String>()
+                        .toList(),
+                    selectedValue: controller.subAdminList.isNotEmpty
+                        ? controller.subAdminList
+                        .firstWhereOrNull(
+                          (user) =>
+                      user.userId == controller.selectedDialogSubAdmin.value,
+                    )
+                        ?.name
+                        : null,
+                    onChanged: (val) {
+                      controller.selectedDialogSubAdmin.value =
+                          controller.subAdminList
+                              .firstWhereOrNull((user) => user.name == val)
+                              ?.userId ??
+                              0;
+                    },
+                    validator: (val) =>
+                    val == null || val.isEmpty ? 'Select Sub Admin' : null,
+                  ),
+                  ),
+                ],
+
+                const SizedBox(height: 20),
+
+                /// Submit button
+                Center(
+                  child: CustomFormButton(
+                    innerText: "Update Role",
+                    onPressed: () async {
+                      Get.back();
+                      await controller.updateUserRole(user.userId!);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      isScrollControlled: true,
+    );
   }
 }
 

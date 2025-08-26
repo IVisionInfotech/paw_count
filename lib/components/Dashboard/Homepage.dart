@@ -7,6 +7,7 @@ import 'package:survey_dogapp/cotroller/chart_cotroller.dart';
 import 'package:survey_dogapp/generated/FontHelper.dart';
 import 'package:survey_dogapp/generated/assets.dart';
 import 'package:survey_dogapp/model/report_model.dart';
+import 'package:survey_dogapp/utils/Constant.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:lottie/lottie.dart';
 
@@ -70,10 +71,10 @@ class Homepage extends StatelessWidget {
                                   yValueMapper: (d, _) => d.dogCount,
                                   dataLabelSettings: const DataLabelSettings(
                                     isVisible: true,
-                                    textStyle: TextStyle(fontSize: 12, color: Colors.white),
+                                    textStyle: TextStyle(fontSize: 12, color: Colors.grey),
                                   ),
                                   pointColorMapper: (d, index) {
-                                    return Assets.dogTypeColors[index % Assets.dogTypeColors.length];
+                                    return UrlConstants.dogTypeColors[index % UrlConstants.dogTypeColors.length];
                                   },
                                   animationDuration: 1000,
                                   explode: true,

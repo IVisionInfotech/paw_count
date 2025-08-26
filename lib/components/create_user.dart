@@ -211,7 +211,7 @@ class _CreateUserState extends State<CreateUser> {
                                         CommonUtils.getUserStateId()!.toInt(),
                                       );
                                       controller.loadAdminList(widget.user);
-                                    } else if (controller.selectedRole.value ==  UrlConstants.SURVEYOR || controller.selectedRole.value ==  UrlConstants.STAFF) {
+                                    } else if (controller.selectedRole.value ==  UrlConstants.SURVEYOR || controller.selectedRole.value ==  'ASSOCIATES') {
                                       if (controller.roleType ==  UrlConstants.SUPER_ADMIN) {
                                         controller.loadAdminList(widget.user);
                                       } else if (controller.roleType ==  UrlConstants.ADMIN) {

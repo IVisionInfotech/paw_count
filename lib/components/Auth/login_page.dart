@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:survey_dogapp/components/Auth/SelectProjectScreen.dart';
 import 'package:survey_dogapp/components/City/cotroller/LocationController.dart';
 import 'package:survey_dogapp/components/Dashboard/dashboard.dart';
 import 'package:survey_dogapp/components/staff_management_screen.dart';
@@ -173,13 +174,12 @@ class _LoginPageState extends State<LoginPage> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       )) {
-        Get.put(LocationController());
-        if (CommonUtils.getUserRole()?.toLowerCase() == 'staff') {
-          Get.offAll(() => StaffManagementScreen());
-        }else{
+        if (loginController.userModel == null) {
+          Get.put(LocationController());
           Get.offAll(() => Dashboard());
+        } else {
+          Get.dialog(SelectProjectScreen(), barrierDismissible: false);
         }
-
       }
     }
   }

@@ -27,11 +27,11 @@ class UserController extends GetxController {
   bool get shouldShowAdminDropdown {
     return roleType == UrlConstants.SUPER_ADMIN &&
         (selectedRole.value == UrlConstants.CITY_ADMIN ||
-            selectedRole.value == UrlConstants.SURVEYOR || selectedRole.value == UrlConstants.STAFF);
+            selectedRole.value == UrlConstants.SURVEYOR || selectedRole.value == 'ASSOCIATES');
   }
 
   bool get shouldShowSubAdminDropdown {
-    return (selectedRole.value == UrlConstants.SURVEYOR || selectedRole.value == UrlConstants.STAFF) &&
+    return (selectedRole.value == UrlConstants.SURVEYOR || selectedRole.value == 'ASSOCIATES') &&
         roleType != UrlConstants.SUB_ADMIN;
   }
 
@@ -63,6 +63,12 @@ class UserController extends GetxController {
   var stateList = <LocationModel>[].obs;
   var cityList = <LocationModel>[].obs;
   RxList<CityBorderModel> cityBorderList = <CityBorderModel>[].obs;
+
+  var selectedDialogRole = ''.obs;
+  var selectedDialogState = 0.obs;
+  var selectedDialogCity = 0.obs;
+  var selectedDialogAdmin = 0.obs;
+  var selectedDialogSubAdmin = 0.obs;
 
   Future<void> fetchStates() async {
     try {
@@ -144,15 +150,20 @@ class UserController extends GetxController {
 
   List<User> get getUsers => userList;
 
-  void fillUserDetails(User user) {
+  void fillUserDetails(User user) async {
+    filteredRoles.clear();
     if (user.role == UrlConstants.ADMIN) {
       selectedRole.value = UrlConstants.STATE_ADMIN;
+      filteredRoles.add(UrlConstants.STATE_ADMIN);
     } else if (user.role == UrlConstants.SUB_ADMIN) {
       selectedRole.value = UrlConstants.CITY_ADMIN;
+      filteredRoles.add(UrlConstants.CITY_ADMIN);
     } else if (user.role == UrlConstants.SURVEYOR) {
       selectedRole.value = UrlConstants.SURVEYOR;
+      filteredRoles.add(UrlConstants.SURVEYOR);
     } else {
-      selectedRole.value = UrlConstants.STAFF;
+      selectedRole.value = UrlConstants.ASSOCIATES;
+      filteredRoles.add(UrlConstants.ASSOCIATES);
     }
 
     nameController.text = user.name ?? '';
@@ -171,12 +182,38 @@ class UserController extends GetxController {
     subAdminList.clear();
     stateList.clear();
     cityList.clear();
-    fetchStates();
-    if (selectedState.value != 0) {
+
+
+    if (user.stateId != null) {
+      LocationModel? stateData = await dbHelper.getLocationById(user.stateId!);
+      if (stateData != null) {
+        stateList.add(stateData);
+      } else {
+        fetchStates();
+      }
+    } else {
+      fetchStates();
+    }
+
+    if (user.assignCityId != null) {
+      LocationModel? cityData = await dbHelper.getLocationById(
+        user.assignCityId!,
+      );
+      if (cityData != null) {
+        cityList.add(cityData);
+      } else if (selectedState.value != 0) {
+        fetchCities(selectedState.value);
+      }
+    } else if (selectedState.value != 0) {
       fetchCities(selectedState.value);
     }
-    loadAdminList(user);
-    loadSubAdminList(user.subAdminId.toString(), user);
+
+    if (user.adminId != 0) {
+      adminList.add(User(userId: user.adminId, name: user.adminName));
+    }
+    if (user.subAdminId != 0) {
+      subAdminList.add(User(userId: user.subAdminId, name: user.subAdminName));
+    }
   }
 
   void clearInputs() {
@@ -722,6 +759,84 @@ class UserController extends GetxController {
       Get.snackbar("Error", e.toString());
     } finally {
       isLoading(false);
+    }
+  }
+
+  void setSelectedRoleForEdit(User user) {
+    selectedRole.value = user.role ?? '';
+    selectedState.value = user.stateId ?? 0;
+    selectedCity.value = user.assignCityId ?? 0;
+    selectedAdmin.value = user.adminId ?? 0;
+    selectedSubAdmin.value = user.subAdminId ?? 0;
+
+    if (selectedRole.value == UrlConstants.STATE_ADMIN) fetchStates();
+    if (selectedRole.value == UrlConstants.CITY_ADMIN)
+      fetchCities(user.stateId ?? 0);
+    if (selectedRole.value == UrlConstants.SURVEYOR) {
+      loadAdminList(user);
+      if (roleType == UrlConstants.ADMIN) {
+        loadSubAdminList((user.adminId ?? 0).toString(), user);
+      }
+    }
+  }
+
+  void resetRoleDependencies() {
+    selectedState.value = 0;
+    selectedCity.value = 0;
+    selectedAdmin.value = 0;
+    selectedSubAdmin.value = 0;
+    if (selectedRole.value == UrlConstants.STATE_ADMIN) fetchStates();
+    if (selectedRole.value == UrlConstants.CITY_ADMIN)
+      fetchStates(); // then cities
+    if (selectedRole.value == UrlConstants.SURVEYOR) {
+      if (roleType == UrlConstants.SUPER_ADMIN) loadAdminList(null);
+      if (roleType == UrlConstants.ADMIN)
+        loadSubAdminList(CommonUtils.getUserId().toString(), null);
+    }
+  }
+
+  Future<void> updateUserRole(int userId) async {
+    try {
+      isLoading.value = true;
+
+      final response = await CommonUtils.callApi(
+        url: UrlConstants.userUpdateRole,
+        body: {
+          'user_id': userId,
+          'user_role': selectedDialogRole.value,
+          'state_id': selectedDialogState.value,
+          'city_id': selectedDialogCity.value,
+          'subadmin_id':
+          selectedDialogAdmin.value == 0 ? '' : selectedDialogAdmin.value,
+          'cityadmin_id':
+          selectedDialogSubAdmin.value == 0
+              ? ''
+              : selectedDialogSubAdmin.value,
+        },
+      );
+
+      if (response == null) {
+        errorMessage('Connection failed. Check your internet.');
+        CommonUtils.buildSnackBar("Connection failed.", "Error", Colors.red, 2);
+        return;
+      }
+
+      if (response.status == 1) {
+        CommonUtils.buildSnackBar(
+          response.message ?? "Role updated",
+          "Success",
+          AppColors.green,
+          2,
+        );
+      } else {
+        errorMessage(response.message ?? 'Operation failed.');
+        CommonUtils.buildSnackBar(errorMessage.value, "Error", Colors.red, 2);
+      }
+    } catch (e) {
+      errorMessage('Something went wrong: $e');
+      CommonUtils.buildSnackBar(errorMessage.value, "Error", Colors.red, 2);
+    } finally {
+      isLoading.value = false;
     }
   }
 

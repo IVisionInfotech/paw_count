@@ -347,7 +347,7 @@ class _CreateUserState extends State<CreateUser> {
                                 readOnly: widget.user == null,
                                 items:
                                     controller.adminList
-                                        .map((user) => user.name)
+                                        .map((user) => user.tempName)
                                         .whereType<String>()
                                         .toList(),
                                 selectedValue:
@@ -358,12 +358,12 @@ class _CreateUserState extends State<CreateUser> {
                                                   user.userId ==
                                                   controller.selectedAdmin.value,
                                             )
-                                            ?.name
+                                            ?.tempName
                                         : null,
                                 onChanged: (val) {
                                   final selectedUser = controller.adminList
                                       .firstWhereOrNull(
-                                        (user) => user.name == val,
+                                        (user) => user.tempName == val,
                                       );
                                   if (selectedUser != null) {
                                     controller.selectedAdmin.value =
@@ -397,7 +397,7 @@ class _CreateUserState extends State<CreateUser> {
                                 readOnly: widget.user == null,
                                 items:
                                     controller.subAdminList
-                                        .map((user) => user.name)
+                                        .map((user) => user.tempName)
                                         .whereType<String>()
                                         .toList(),
                                 selectedValue:
@@ -410,13 +410,13 @@ class _CreateUserState extends State<CreateUser> {
                                                       .selectedSubAdmin
                                                       .value,
                                             )
-                                            ?.name
+                                            ?.tempName
                                         : null,
                                 onChanged: (val) {
                                   controller.selectedSubAdmin.value =
                                       controller.subAdminList
                                           .firstWhereOrNull(
-                                            (user) => user.name == val,
+                                            (user) => user.tempName == val,
                                           )
                                           ?.userId ??
                                       0;

@@ -21,7 +21,6 @@ class StaffManagementController extends GetxController
   var staffDogList = <StaffDogModel>[].obs;
   var showImageError = false.obs;
 
-
   var filteredStaffDogList = <StaffDogModel>[].obs;
 
   var startDate = Rxn<DateTime>();
@@ -29,6 +28,7 @@ class StaffManagementController extends GetxController
   var selectedDogTypeId = "".obs;
 
   void pickImageDialog() {
+    print("pickImageDialog");
     ImagePickerUtil().pickImageDialog(
       onImageSelected: (file) {
         pickedImage.value = file;
@@ -37,6 +37,7 @@ class StaffManagementController extends GetxController
       onError: (message) {
         CommonUtils.buildSnackBar(message, "Error", AppColors.red, 2);
       },
+      onlyCamera: true,
     );
   }
 
@@ -71,7 +72,9 @@ class StaffManagementController extends GetxController
 
     tabController.addListener(() {
       tabIndex.value = tabController.index;
-      if (tabIndex.value == 1) {
+      if(tabIndex.value == 0 && dogTypeList.isEmpty){
+        dogTypeFetch();
+      }else if (tabIndex.value == 1) {
         staffDogFetch();
       }
     });
@@ -105,7 +108,7 @@ class StaffManagementController extends GetxController
     errorMessage("");
 
     final response = await CommonUtils.callApi(
-      url: "${UrlConstants.staff}?user_id=${CommonUtils.getUserId()}",
+      url: "${UrlConstants.staff}?login_id=${CommonUtils.getUserId()}&user_id=${CommonUtils.getUserId()}",
       body: {'action': "list"},
     );
 
@@ -152,14 +155,12 @@ class StaffManagementController extends GetxController
     }
   }
 
-
   void resetDialog() {
     pickedImage.value = null;
     remark.value = "";
   }
 
   Future<void> saveDogCatch({required DogTypeModel dogModel}) async {
-
     isLoading(true);
     errorMessage("");
     bool gotLocation = await _getCurrentLocation();

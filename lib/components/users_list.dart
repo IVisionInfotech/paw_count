@@ -37,13 +37,14 @@ class _UsersListState extends State<UsersList>
   late TabController _tabController;
 
   final roleMap = {
-    'Admin List': UrlConstants.ADMIN,
-    'SubAdmin List': UrlConstants.SUB_ADMIN,
+    'State Admin List': UrlConstants.ADMIN,
+    'City Admin List': UrlConstants.SUB_ADMIN,
     'Surveyor List': UrlConstants.SURVEYOR,
     'Associates List': UrlConstants.STAFF,
   };
 
   String getRoleFromTitle() {
+    print(widget.title);
     return roleMap[widget.title] ?? UrlConstants.SUB_ADMIN;
   }
 
@@ -439,7 +440,7 @@ class _UsersListState extends State<UsersList>
           final labelText = e is DogTypeModel
               ? e.name ?? ''
               : e is User
-              ? e.name ?? ''
+              ? e.tempName ?? ''
               : e.toString();
 
           return MultiSelectItem<T>(e, labelText);
@@ -630,7 +631,7 @@ class _UsersListState extends State<UsersList>
 
   void showUpdateRoleBottomSheet(BuildContext context, User user) {
     final controller = Get.find<UserController>();
-    controller.setSelectedRoleForEdit(user); // your method to pre-fill values
+    controller.setSelectedRoleForEdit(user);
 
     Get.bottomSheet(
       Container(
@@ -758,7 +759,7 @@ class _UsersListState extends State<UsersList>
                       hintText: "Select State Admin",
                       isDropdown: true,
                       items: controller.adminList
-                          .map((user) => user.name)
+                          .map((user) => user.tempName)
                           .whereType<String>()
                           .toList(),
                       selectedValue: controller.adminList.isNotEmpty
@@ -766,11 +767,11 @@ class _UsersListState extends State<UsersList>
                           .firstWhereOrNull(
                             (user) => user.userId == controller.selectedDialogAdmin.value,
                       )
-                          ?.name
+                          ?.tempName
                           : null,
                       onChanged: (val) {
                         final selectedUser = controller.adminList.firstWhereOrNull(
-                              (user) => user.name == val,
+                              (user) => user.tempName == val,
                         );
                         if (selectedUser != null) {
                           controller.selectedDialogAdmin.value = selectedUser.userId ?? 0;
@@ -792,7 +793,7 @@ class _UsersListState extends State<UsersList>
                     hintText: "Select City Admin",
                     isDropdown: true,
                     items: controller.subAdminList
-                        .map((user) => user.name)
+                        .map((user) => user.tempName)
                         .whereType<String>()
                         .toList(),
                     selectedValue: controller.subAdminList.isNotEmpty
@@ -801,14 +802,15 @@ class _UsersListState extends State<UsersList>
                           (user) =>
                       user.userId == controller.selectedDialogSubAdmin.value,
                     )
-                        ?.name
+                        ?.tempName
                         : null,
                     onChanged: (val) {
-                      controller.selectedDialogSubAdmin.value =
-                          controller.subAdminList
-                              .firstWhereOrNull((user) => user.name == val)
-                              ?.userId ??
-                              0;
+                      final selectedUser = controller.subAdminList
+                          .firstWhereOrNull((user) => user.tempName == val);
+
+                      controller.selectedDialogSubAdmin.value = selectedUser?.userId ?? 0;
+                      controller.selectedDialogState.value    = selectedUser?.stateId ?? 0;
+                      controller.selectedDialogCity.value     = selectedUser?.assignCityId ?? 0;
                     },
                     validator: (val) =>
                     val == null || val.isEmpty ? 'Select Sub Admin' : null,
@@ -818,7 +820,6 @@ class _UsersListState extends State<UsersList>
 
                 const SizedBox(height: 20),
 
-                /// Submit button
                 Center(
                   child: CustomFormButton(
                     innerText: "Update Role",

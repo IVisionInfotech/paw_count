@@ -12,7 +12,13 @@ class ImagePickerUtil {
   void pickImageDialog({
     required Function(File) onImageSelected,
     required Function(String) onError,
+    bool onlyCamera = false,
   }) {
+    if (onlyCamera) {
+      pickImage(ImageSource.camera, onImageSelected, onError);
+      return;
+    }
+
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -41,6 +47,7 @@ class ImagePickerUtil {
       ),
     );
   }
+
 
   Future<void> pickImage(
       ImageSource source,

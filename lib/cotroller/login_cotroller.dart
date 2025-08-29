@@ -3,6 +3,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:survey_dogapp/components/City/Model/LocationModel.dart';
 import 'package:survey_dogapp/components/City/cotroller/LocationController.dart';
 import 'package:survey_dogapp/components/Dashboard/dashboard.dart';
+import 'package:survey_dogapp/components/staff_management_screen.dart';
 import 'package:survey_dogapp/model/User.dart';
 import '../model/user_model.dart';
 import '../utils/Common.dart';
@@ -176,7 +177,11 @@ class LoginController extends GetxController {
           UserModel.schema,
         );
         Get.put(LocationController());
-        Get.offAll(() => Dashboard());
+        if (CommonUtils.getUserRole()?.toLowerCase() == 'staff') {
+          Get.offAll(() => StaffManagementScreen());
+        }else{
+          Get.offAll(() => Dashboard());
+        }
         return true;
       } else {
         errorMessage(response.message ?? "Invalid user data received.");

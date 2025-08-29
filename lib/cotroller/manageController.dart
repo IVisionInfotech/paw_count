@@ -14,8 +14,8 @@ class ManageController extends GetxController {
   var roleType = ''.obs;
   var manageItems = <Map<String, dynamic>>[].obs;
   final List<Map<String, dynamic>> allItems = [
-    {'title': 'State Admin', 'icon': Icons.admin_panel_settings, 'screen': UsersList(title: 'Admin List'), 'count': 0},
-    {'title': 'City Admin', 'icon': Icons.supervised_user_circle, 'screen': UsersList(title: 'SubAdmin List'), 'count': 0},
+    {'title': 'State Admin', 'icon': Icons.admin_panel_settings, 'screen': UsersList(title: 'State Admin List'), 'count': 0},
+    {'title': 'City Admin', 'icon': Icons.supervised_user_circle, 'screen': UsersList(title: 'City Admin List'), 'count': 0},
     {'title': 'Surveyor', 'icon': Icons.badge, 'screen': UsersList(title: 'Surveyor List'), 'count': 0},
     {'title': 'Associates', 'icon': Icons.person_pin_sharp, 'screen': UsersList(title: 'Associates List'), 'count': 0},
     {'title': 'Dog Type', 'icon': Icons.pets, 'screen': DogTypeManagementScreen(), 'count': 0},

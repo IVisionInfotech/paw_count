@@ -18,6 +18,7 @@ class User {
   int? adminValue;
   int? assignCityId;
   String? registeredDeviceId;
+  String? tempName;
   int? ownership;
   int? changeBorder;
   int? status;
@@ -46,6 +47,7 @@ class User {
     this.adminValue,
     this.assignCityId,
     this.registeredDeviceId,
+    this.tempName,
     this.ownership,
     this.changeBorder,
     this.status,
@@ -75,6 +77,7 @@ class User {
     adminValue = json['admin_value'];
     assignCityId = json['assign_city_id'];
     registeredDeviceId = json['registered_device_id'];
+    tempName = json['temp_name'];
     ownership = json['ownership'];
     changeBorder = json['change_border'];
     status = json['status'];
@@ -106,6 +109,7 @@ class User {
     data['admin_value'] = adminValue;
     data['assign_city_id'] = assignCityId;
     data['registered_device_id'] = registeredDeviceId;
+    data['temp_name'] = tempName;
     data['ownership'] = ownership;
     data['change_border'] = changeBorder;
     data['status'] = status;

@@ -21,7 +21,6 @@ class CustomInputField extends StatefulWidget {
   final TextCapitalization textCapitalization;
   final VoidCallback? onTap;
 
-
   const CustomInputField({
     Key? key,
     this.labelText,
@@ -63,20 +62,27 @@ class _CustomInputFieldState extends State<CustomInputField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if(widget.labelText != null)
-          Text(widget.labelText!, style: FontHelper.bold(fontSize: 18)),
+          if (widget.labelText != null)
+            Text(widget.labelText!, style: FontHelper.bold(fontSize: 18)),
           const SizedBox(height: 4),
           widget.isDropdown
               ? DropdownButtonFormField<String>(
+            isExpanded: true, // 👈 ensures full text shown in field
             value: (widget.items?.contains(widget.selectedValue) ?? false)
                 ? widget.selectedValue
                 : null,
-            isDense: true,
             items: widget.items
-                ?.map((e) => DropdownMenuItem(
-              value: e,
-              child: Text(e, style: FontHelper.regular(fontSize: 16)),
-            ))
+                ?.map(
+                  (e) => DropdownMenuItem(
+                value: e,
+                child: Text(
+                  e,
+                  style: FontHelper.regular(fontSize: 16),
+                  softWrap: true, // allow multiple lines
+                  overflow: TextOverflow.visible, // show full text
+                ),
+              ),
+            )
                 .toList() ??
                 [],
             onChanged: widget.onChanged,
@@ -123,8 +129,9 @@ class _CustomInputFieldState extends State<CustomInputField> {
                 },
               )
                   : null,
-              suffixIconConstraints:
-              widget.isDense != null ? const BoxConstraints(maxHeight: 33) : null,
+              suffixIconConstraints: widget.isDense != null
+                  ? const BoxConstraints(maxHeight: 33)
+                  : null,
             ),
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: widget.validator,

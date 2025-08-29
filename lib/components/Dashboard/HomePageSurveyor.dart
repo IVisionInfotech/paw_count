@@ -153,7 +153,7 @@ class _HomepagesurveyorState extends State<Homepagesurveyor>
                         );
                       }),
                   ],
-                ),
+                ).marginOnly(left: 8,right: 8),
               ),
               const SizedBox(height: 10),
             ],
@@ -576,7 +576,7 @@ class _HomepagesurveyorState extends State<Homepagesurveyor>
           style: FontHelper.semiBold(fontSize: 14, color: AppColors.black),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade300),
             borderRadius: BorderRadius.circular(8),
@@ -584,10 +584,10 @@ class _HomepagesurveyorState extends State<Homepagesurveyor>
           ),
           child: DropdownButton<int>(
             value: value,
-            style: FontHelper.regular(color: AppColors.black, fontSize: 14),
+            style: FontHelper.regular(color: AppColors.black, fontSize: 12),
             hint: Text(
               'Select $label',
-              style: FontHelper.regular(fontSize: 15, color: AppColors.grey),
+              style: FontHelper.regular(fontSize: 12, color: AppColors.grey),
             ),
             underline: const SizedBox(),
             isDense: true,
@@ -596,7 +596,7 @@ class _HomepagesurveyorState extends State<Homepagesurveyor>
             items.map((user) {
               return DropdownMenuItem<int>(
                 value: user.userId,
-                child: Text(user.name ?? "N/A"),
+                child: Text(user.tempName ?? "N/A"),
               );
             }).toList(),
           ),

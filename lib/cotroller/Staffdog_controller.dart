@@ -61,7 +61,7 @@ class StaffDogController extends GetxController {
     errorMessage("");
 
     final response = await CommonUtils.callApi(
-      url: "${UrlConstants.staff}?user_id=${user.userId}",
+      url: "${UrlConstants.staff}?login_id=${CommonUtils.getUserId()}&user_id=${user.userId}",
       body: {'action': "list"},
     );
 

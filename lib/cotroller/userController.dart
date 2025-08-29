@@ -27,11 +27,13 @@ class UserController extends GetxController {
   bool get shouldShowAdminDropdown {
     return roleType == UrlConstants.SUPER_ADMIN &&
         (selectedRole.value == UrlConstants.CITY_ADMIN ||
-            selectedRole.value == UrlConstants.SURVEYOR || selectedRole.value == 'ASSOCIATES');
+            selectedRole.value == UrlConstants.SURVEYOR ||
+            selectedRole.value == 'ASSOCIATES');
   }
 
   bool get shouldShowSubAdminDropdown {
-    return (selectedRole.value == UrlConstants.SURVEYOR || selectedRole.value == 'ASSOCIATES') &&
+    return (selectedRole.value == UrlConstants.SURVEYOR ||
+            selectedRole.value == 'ASSOCIATES') &&
         roleType != UrlConstants.SUB_ADMIN;
   }
 
@@ -183,7 +185,6 @@ class UserController extends GetxController {
     stateList.clear();
     cityList.clear();
 
-
     if (user.stateId != null) {
       LocationModel? stateData = await dbHelper.getLocationById(user.stateId!);
       if (stateData != null) {
@@ -320,7 +321,7 @@ class UserController extends GetxController {
       formattedRole = UrlConstants.SUB_ADMIN;
     } else if (selectedRole.value == UrlConstants.SURVEYOR) {
       formattedRole = UrlConstants.SURVEYOR;
-    }  else if (selectedRole.value == 'ASSOCIATES') {
+    } else if (selectedRole.value == 'ASSOCIATES') {
       formattedRole = UrlConstants.STAFF;
     }
 
@@ -347,14 +348,24 @@ class UserController extends GetxController {
           "ownership": ownership.value,
           "change_border": canChangeBorder.value,
         });
+        if (CommonUtils.getUserRole() == UrlConstants.ADMIN) {
+          base["admin_id"] = CommonUtils.getUserId().toString();
+        }
         break;
       case UrlConstants.SURVEYOR:
       case UrlConstants.STAFF:
-        base["admin_id"] = selectedAdmin.value;
-        base["sub_admin_id"] = selectedSubAdmin.value;
+        if (CommonUtils.getUserRole() == UrlConstants.ADMIN) {
+          base["admin_id"] = CommonUtils.getUserId().toString();
+          base["sub_admin_id"] = selectedSubAdmin.value;
+        } else if (CommonUtils.getUserRole() == UrlConstants.SUB_ADMIN) {
+          base["admin_id"] = CommonUtils.getCurrentUser()!.adminId.toString();
+          base["sub_admin_id"] = CommonUtils.getUserId().toString();
+        } else {
+          base["admin_id"] = selectedAdmin.value;
+          base["sub_admin_id"] = selectedSubAdmin.value;
+        }
         break;
     }
-    print('+++++++++++++++++++  $base');
     return base;
   }
 
@@ -466,9 +477,12 @@ class UserController extends GetxController {
     if (response != null && response.status == 1 && response.userList != null) {
       if (user == null) {
         subAdminList.assignAll(response.userList!);
+
       } else {
-        final filteredList =
-            response.userList!.where((u) => u.userId != user.userId).toList();
+        final filteredList = response.userList!
+            .where((u) =>
+        !(u.userId == user.userId && u.assignCityId == user.assignCityId))
+            .toList();
         subAdminList.assignAll(filteredList);
       }
     }
@@ -500,7 +514,7 @@ class UserController extends GetxController {
     }
   }
 
-  Future<bool> unRegisterUser(User user,int isRegister) async {
+  Future<bool> unRegisterUser(User user, int isRegister) async {
     try {
       isLoading.value = true;
       errorMessage("");
@@ -517,8 +531,14 @@ class UserController extends GetxController {
       }
 
       if (response.status == 1) {
-        errorMessage.value = response.message ?? 'User unregistered successfully';
-        CommonUtils.buildSnackBar(errorMessage.value, "Success", Colors.green, 2);
+        errorMessage.value =
+            response.message ?? 'User unregistered successfully';
+        CommonUtils.buildSnackBar(
+          errorMessage.value,
+          "Success",
+          Colors.green,
+          2,
+        );
         return true;
       } else {
         errorMessage.value = response.message ?? 'Failed to unregister user';
@@ -570,7 +590,7 @@ class UserController extends GetxController {
     errorMessage("");
 
     final response = await CommonUtils.callApi(
-      url: UrlConstants.staff,
+      url: "${UrlConstants.staff}?login_id=${CommonUtils.getUserId()}",
       body: {'action': "list"},
     );
 
@@ -593,21 +613,23 @@ class UserController extends GetxController {
     List<StaffDogModel> list = List.from(staffDogList);
 
     if (selectedStartDate.value != null || selectedEndDate.value != null) {
-      list = list.where((dog) {
-        if (dog.createdAt == null) return false;
+      list =
+          list.where((dog) {
+            if (dog.createdAt == null) return false;
 
-        DateTime dogDate = DateTime.tryParse(dog.createdAt!) ?? DateTime(2000);
+            DateTime dogDate =
+                DateTime.tryParse(dog.createdAt!) ?? DateTime(2000);
 
-        if (selectedStartDate.value != null &&
-            dogDate.isBefore(selectedStartDate.value!)) {
-          return false;
-        }
-        if (selectedEndDate.value != null &&
-            dogDate.isAfter(selectedEndDate.value!)) {
-          return false;
-        }
-        return true;
-      }).toList();
+            if (selectedStartDate.value != null &&
+                dogDate.isBefore(selectedStartDate.value!)) {
+              return false;
+            }
+            if (selectedEndDate.value != null &&
+                dogDate.isAfter(selectedEndDate.value!)) {
+              return false;
+            }
+            return true;
+          }).toList();
     }
 
     if (selectedDogTypes.isNotEmpty) {
@@ -667,19 +689,14 @@ class UserController extends GetxController {
       }
 
       if (selectedStartDate.value != null) {
-        body['start_date'] = selectedStartDate.value!
-            .toIso8601String()
-            .split('T')
-            .first;
+        body['start_date'] =
+            selectedStartDate.value!.toIso8601String().split('T').first;
       }
 
       if (selectedEndDate.value != null) {
-        body['end_date'] = selectedEndDate.value!
-            .toIso8601String()
-            .split('T')
-            .first;
+        body['end_date'] =
+            selectedEndDate.value!.toIso8601String().split('T').first;
       }
-
 
       final response = await CommonUtils.callApi(
         url: '${UrlConstants.staff}/report',
@@ -688,7 +705,8 @@ class UserController extends GetxController {
       );
 
       if (response != null && response.status == 1 && response.pdfurl != null) {
-        final fileName = "PawCount_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf";
+        final fileName =
+            "PawCount_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf";
         final downloads = Directory('/storage/emulated/0/Download/PawCount');
 
         if (!(await downloads.exists())) {
@@ -700,19 +718,19 @@ class UserController extends GetxController {
         final dio = Dio();
 
         Get.dialog(
-          Obx(() => AlertDialog(
-            title: const Text("Downloading..."),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                LinearProgressIndicator(
-                  value: downloadProgress.value,
-                ),
-                const SizedBox(height: 10),
-                Text("${(downloadProgress.value * 100).toStringAsFixed(0)}%"),
-              ],
+          Obx(
+            () => AlertDialog(
+              title: const Text("Downloading..."),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LinearProgressIndicator(value: downloadProgress.value),
+                  const SizedBox(height: 10),
+                  Text("${(downloadProgress.value * 100).toStringAsFixed(0)}%"),
+                ],
+              ),
             ),
-          )),
+          ),
           barrierDismissible: false,
         );
 
@@ -731,23 +749,24 @@ class UserController extends GetxController {
         if (res.statusCode == 200) {
           showDialog(
             context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Download Complete'),
-              content: Text('Saved to:\n$savePath'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Cancel'),
+            builder:
+                (ctx) => AlertDialog(
+                  title: const Text('Download Complete'),
+                  content: Text('Saved to:\n$savePath'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        OpenFilex.open(savePath);
+                      },
+                      child: const Text('Open'),
+                    ),
+                  ],
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                    OpenFilex.open(savePath);
-                  },
-                  child: const Text('Open'),
-                ),
-              ],
-            ),
           );
         } else {
           Get.snackbar("Download Failed", "Could not download the PDF.");
@@ -797,6 +816,11 @@ class UserController extends GetxController {
 
   Future<void> updateUserRole(int userId) async {
     try {
+      if (selectedDialogRole.value == UrlConstants.STATE_ADMIN) {
+        selectedDialogRole.value = UrlConstants.ADMIN;
+      }else if (selectedDialogRole.value == UrlConstants.CITY_ADMIN) {
+        selectedDialogRole.value = UrlConstants.SUB_ADMIN;
+      }
       isLoading.value = true;
 
       final response = await CommonUtils.callApi(
@@ -807,11 +831,11 @@ class UserController extends GetxController {
           'state_id': selectedDialogState.value,
           'city_id': selectedDialogCity.value,
           'subadmin_id':
-          selectedDialogAdmin.value == 0 ? '' : selectedDialogAdmin.value,
+              selectedDialogAdmin.value == 0 ? '' : selectedDialogAdmin.value,
           'cityadmin_id':
-          selectedDialogSubAdmin.value == 0
-              ? ''
-              : selectedDialogSubAdmin.value,
+              selectedDialogSubAdmin.value == 0
+                  ? ''
+                  : selectedDialogSubAdmin.value,
         },
       );
 
@@ -839,6 +863,4 @@ class UserController extends GetxController {
       isLoading.value = false;
     }
   }
-
-
 }

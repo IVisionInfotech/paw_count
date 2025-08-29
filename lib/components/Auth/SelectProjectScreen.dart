@@ -140,8 +140,6 @@ class _SelectProjectScreenState extends State<SelectProjectScreen> {
                                 "Error",
                                 controller.errorMessage.value,
                               );
-                            } else {
-                              Get.back();
                             }
                           },
                         );

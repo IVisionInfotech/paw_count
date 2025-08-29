@@ -85,7 +85,7 @@ class UserCardWidget extends StatelessWidget {
         title: SizedBox(
           height: 20,
           child: Marquee(
-            text: user.name.toString(),
+            text: user.tempName.toString(),
             style: FontHelper.bold(fontSize: 16, color: AppColors.primary),
             scrollAxis: Axis.horizontal,
             crossAxisAlignment: CrossAxisAlignment.start,

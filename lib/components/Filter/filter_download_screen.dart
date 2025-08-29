@@ -72,9 +72,9 @@ class FilterDownloadScreen extends StatelessWidget {
             items.map((e) {
               final labelText =
                   e is LocationModel
-                      ? e.locationName ?? ''
+                      ? e.locationName
                       : e is User
-                      ? e.name ?? ''
+                      ? e.tempName ?? ''
                       : e is DogTypeModel
                       ? e.name ?? ''
                       : e.toString();
@@ -95,9 +95,7 @@ class FilterDownloadScreen extends StatelessWidget {
         listType: MultiSelectListType.CHIP,
         backgroundColor: AppColors.white,
         unselectedColor: AppColors.greyBg,
-        // Light grey background for unselected chips
         selectedColor: AppColors.primary,
-        // Your primary color for selected
         checkColor: AppColors.white,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
@@ -114,7 +112,7 @@ class FilterDownloadScreen extends StatelessWidget {
         onConfirm: (val) => selectedItems.value = val,
         cancelText: Text(
           "Cancel",
-          style: TextStyle(color: AppColors.logoutRed), // red for cancel
+          style: TextStyle(color: AppColors.logoutRed),
         ),
         confirmText: Text(
           "Ok",
